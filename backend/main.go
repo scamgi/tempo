@@ -42,6 +42,9 @@ func main() {
 	userStore := db.NewUserStore(dbpool)
 	userHandler := api.NewUserHandler(userStore)
 
+	todoStore := db.NewTodoStore(dbpool)
+	todoHandler := api.NewTodoHandler(todoStore)
+
 	// Initialize Echo
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -50,15 +53,30 @@ func main() {
 	// --- API Routes ---
 	apiGroup := e.Group("/api")
 
-	// User routes
+	// User routes (public)
 	userGroup := apiGroup.Group("/users")
 	userGroup.POST("/register", userHandler.HandleRegisterUser)
 	userGroup.POST("/login", userHandler.HandleLoginUser)
 
+	// To-Do List routes (protected)
+	listGroup := apiGroup.Group("/lists")
+	listGroup.Use(api.JWTAuthMiddleware) // Apply the middleware to all routes in this group
+	listGroup.POST("", todoHandler.HandleCreateTodoList)
+	listGroup.GET("", todoHandler.HandleGetTodoLists)
+	listGroup.GET("/:listId", todoHandler.HandleGetTodoListAndItems)
+	listGroup.DELETE("/:listId", todoHandler.HandleDeleteTodoList)
+	listGroup.POST("/:listId/items", todoHandler.HandleCreateTodoItem)
+
+	// To-Do Item routes (protected)
+	itemGroup := apiGroup.Group("/items")
+	itemGroup.Use(api.JWTAuthMiddleware)
+	itemGroup.PUT("/:itemId", todoHandler.HandleUpdateTodoItem)
+	itemGroup.DELETE("/:itemId", todoHandler.HandleDeleteTodoItem)
+
 	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080" // Default port
+		port = "8080"
 	}
 	log.Fatal(e.Start(":" + port))
 }
