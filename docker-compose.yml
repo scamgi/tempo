@@ -1,0 +1,35 @@
+services:
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:16-alpine
+    container_name: tempo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tempo_db
+      POSTGRES_USER: tempo_user
+      POSTGRES_PASSWORD: your_strong_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tempo_user -d tempo_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Flyway Migration Service
+  flyway:
+    image: flyway/flyway:10-alpine
+    container_name: tempo-flyway
+    command: migrate
+    volumes:
+      - ./db/migrations:/flyway/sql
+      - ./db/flyway.conf:/flyway/conf/flyway.conf
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
