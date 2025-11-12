@@ -9,16 +9,18 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+
+	"tempo-backend/api"
+	"tempo-backend/db"
 )
 
 func main() {
-	// Load environment variables from .env file
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("No .env file found, using environment variables")
+		log.Println("No .env file found")
 	}
 
-	// Establish database connection
 	dbSource := os.Getenv("DB_SOURCE")
 	if dbSource == "" {
 		log.Fatal("DB_SOURCE environment variable is not set")
@@ -30,22 +32,33 @@ func main() {
 	}
 	defer dbpool.Close()
 
-	// Ping the database to verify the connection
 	err = dbpool.Ping(context.Background())
 	if err != nil {
 		log.Fatalf("Unable to ping database: %v\n", err)
 	}
-
 	fmt.Println("Successfully connected to the database!")
 
-	// Initialize Echo web server
+	// Initialize stores and handlers
+	userStore := db.NewUserStore(dbpool)
+	userHandler := api.NewUserHandler(userStore)
+
+	// Initialize Echo
 	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
-	// Define a simple root route
-	e.GET("/", func(c echo.Context) error {
-		return c.String(200, "Hello, Tempo API!")
-	})
+	// --- API Routes ---
+	apiGroup := e.Group("/api")
 
-	// Start the server
-	log.Fatal(e.Start(":8080"))
+	// User routes
+	userGroup := apiGroup.Group("/users")
+	userGroup.POST("/register", userHandler.HandleRegisterUser)
+	userGroup.POST("/login", userHandler.HandleLoginUser)
+
+	// Start server
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Default port
+	}
+	log.Fatal(e.Start(":" + port))
 }
