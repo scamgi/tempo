@@ -45,6 +45,12 @@ func main() {
 	todoStore := db.NewTodoStore(dbpool)
 	todoHandler := api.NewTodoHandler(todoStore)
 
+	noteStore := db.NewNoteStore(dbpool)
+	noteHandler := api.NewNoteHandler(noteStore)
+
+	journalStore := db.NewJournalStore(dbpool)
+	journalHandler := api.NewJournalHandler(journalStore)
+
 	// Initialize Echo
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -72,6 +78,25 @@ func main() {
 	itemGroup.Use(api.JWTAuthMiddleware)
 	itemGroup.PUT("/:itemId", todoHandler.HandleUpdateTodoItem)
 	itemGroup.DELETE("/:itemId", todoHandler.HandleDeleteTodoItem)
+
+	// Notes routes (protected)
+	noteGroup := apiGroup.Group("/notes")
+	noteGroup.Use(api.JWTAuthMiddleware)
+	noteGroup.POST("", noteHandler.HandleCreateNote)
+	noteGroup.GET("", noteHandler.HandleGetNotes)
+	noteGroup.GET("/:noteId", noteHandler.HandleGetNote)
+	noteGroup.PUT("/:noteId", noteHandler.HandleUpdateNote)
+	noteGroup.DELETE("/:noteId", noteHandler.HandleDeleteNote)
+
+	// Journal routes (protected)
+	journalGroup := apiGroup.Group("/journal")
+	journalGroup.Use(api.JWTAuthMiddleware)
+	journalGroup.POST("", journalHandler.HandleCreateJournalEntry)
+	journalGroup.GET("", journalHandler.HandleGetJournalEntries)
+	journalGroup.GET("/:entryId", journalHandler.HandleGetJournalEntry)
+	journalGroup.PUT("/:entryId", journalHandler.HandleUpdateJournalEntry)
+	journalGroup.DELETE("/:entryId", journalHandler.HandleDeleteJournalEntry)
+
 
 	// Start server
 	port := os.Getenv("PORT")
