@@ -14,3 +14,6 @@ captures/
 # Keystore files
 *.jks
 *.keystore
+
+# Kotlin log errors
+.kotlin/errors/*
