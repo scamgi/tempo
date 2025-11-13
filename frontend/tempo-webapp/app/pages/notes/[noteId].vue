@@ -66,7 +66,7 @@ const config = useRuntimeConfig();
 const authStore = useAuthStore();
 const noteId = route.params.noteId;
 
-const { data: noteData, pending, error } = await useApiFetch(`/notes/${noteId}`);
+const { data: noteData, pending, error } = await useApiFetch(() => `/notes/${route.params.noteId}`);
 
 const editableTitle = ref('');
 const editableContent = ref('');
