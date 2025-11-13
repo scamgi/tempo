@@ -18,12 +18,14 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.example.tempo.TempoApp
 import com.example.tempo.data.AuthRepository
+import com.example.tempo.data.TodoRepository
 import com.example.tempo.data.UserPreferencesRepository
 import com.example.tempo.data.remote.RetrofitInstance
 import com.example.tempo.ui.auth.AuthState
 import com.example.tempo.ui.auth.AuthViewModel
 import com.example.tempo.ui.auth.LoginScreen
 import com.example.tempo.ui.auth.RegisterScreen
+import com.example.tempo.ui.todo.TodoViewModel
 
 object AppRoutes {
     const val AUTH_GRAPH = "auth_graph"
@@ -110,7 +112,7 @@ fun NavGraphBuilder.authGraph(navController: NavHostController) {
 
 
 @Composable
-private fun getAuthViewModel(): AuthViewModel {
+fun getAuthViewModel(): AuthViewModel {
     val context = LocalContext.current
     val factory = remember {
         object : ViewModelProvider.Factory {
@@ -121,6 +123,24 @@ private fun getAuthViewModel(): AuthViewModel {
 
                 @Suppress("UNCHECKED_CAST")
                 return AuthViewModel(authRepository, userPreferencesRepository) as T
+            }
+        }
+    }
+    return viewModel(factory = factory)
+}
+
+@Composable
+fun getTodoViewModel(): TodoViewModel {
+    val context = LocalContext.current
+    val factory = remember {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val application = context.applicationContext as Application
+                val userPreferencesRepository = UserPreferencesRepository(application)
+                val todoRepository = TodoRepository(RetrofitInstance.api, userPreferencesRepository)
+
+                @Suppress("UNCHECKED_CAST")
+                return TodoViewModel(todoRepository) as T
             }
         }
     }

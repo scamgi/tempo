@@ -5,13 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -19,7 +17,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.tempo.navigation.AppNavigation
+import com.example.tempo.navigation.getTodoViewModel
 import com.example.tempo.ui.theme.TempoTheme
+import com.example.tempo.ui.todo.TodoScreen
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -81,7 +81,7 @@ fun TempoApp() {
             }
         ) { innerPadding ->
             when (currentDestination) {
-                AppDestination.TODO -> TodoScreen(modifier = Modifier.padding(innerPadding))
+                AppDestination.TODO -> TodoScreen(viewModel = getTodoViewModel(), modifier = Modifier.padding(innerPadding))
                 AppDestination.NOTES -> NotesScreen(modifier = Modifier.padding(innerPadding))
                 AppDestination.JOURNAL -> JournalScreen(modifier = Modifier.padding(innerPadding))
                 AppDestination.SETTINGS -> SettingsScreen(modifier = Modifier.padding(innerPadding))
@@ -99,47 +99,6 @@ enum class AppDestination(
     NOTES("Notes", Icons.Filled.Edit),
     JOURNAL("Journal", Icons.Filled.DateRange),
     SETTINGS("Settings", Icons.Filled.Settings),
-}
-
-enum class TodoDestination(
-    val label: String,
-    val icon: ImageVector,
-) {
-    HOME("Home", Icons.Default.Home),
-    FAVORITES("Favorites", Icons.Default.Favorite),
-    PROFILE("Profile", Icons.Default.AccountBox),
-}
-
-@Composable
-fun TodoScreen(modifier: Modifier = Modifier) {
-    var currentTodoDestination by rememberSaveable { mutableStateOf(TodoDestination.HOME) }
-
-    NavigationSuiteScaffold(
-        modifier = modifier,
-        navigationSuiteItems = {
-            TodoDestination.entries.forEach {
-                item(
-                    icon = {
-                        Icon(
-                            it.icon,
-                            contentDescription = it.label
-                        )
-                    },
-                    label = { Text(it.label) },
-                    selected = it == currentTodoDestination,
-                    onClick = { currentTodoDestination = it }
-                )
-            }
-        }
-    ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            when (currentTodoDestination) {
-                TodoDestination.HOME -> HomeScreen(modifier = Modifier.padding(innerPadding))
-                TodoDestination.FAVORITES -> FavoritesScreen(modifier = Modifier.padding(innerPadding))
-                TodoDestination.PROFILE -> ProfileScreen(modifier = Modifier.padding(innerPadding))
-            }
-        }
-    }
 }
 
 @Composable
@@ -162,30 +121,6 @@ fun JournalScreen(modifier: Modifier = Modifier) {
 fun SettingsScreen(modifier: Modifier = Modifier) {
     Text(
         text = "Hello Settings!",
-        modifier = modifier
-    )
-}
-
-@Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello Home!",
-        modifier = modifier
-    )
-}
-
-@Composable
-fun FavoritesScreen(modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello Favorites!",
-        modifier = modifier
-    )
-}
-
-@Composable
-fun ProfileScreen(modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello Profile!",
         modifier = modifier
     )
 }
