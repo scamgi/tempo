@@ -6,14 +6,12 @@ plugins {
 
 android {
     namespace = "com.example.tempo"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36 // Updated to meet dependency requirements
 
     defaultConfig {
         applicationId = "com.example.tempo"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 36 // Updated to match compileSdk
         versionCode = 1
         versionName = "1.0"
 
@@ -30,14 +28,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "1.8"
     }
     buildFeatures {
         compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.11" // Updated for compatibility
     }
 }
 
@@ -51,6 +52,17 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
+
+    // Navigation, ViewModel, DataStore, and Networking
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
