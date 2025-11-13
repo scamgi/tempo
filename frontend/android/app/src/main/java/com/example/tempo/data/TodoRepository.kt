@@ -1,6 +1,7 @@
 package com.example.tempo.data
 
 import com.example.tempo.data.remote.ApiService
+import com.example.tempo.data.remote.CreateTodoListPayload
 import com.example.tempo.data.remote.TodoList
 import com.example.tempo.data.remote.TodoListWithItems
 import kotlinx.coroutines.flow.first
@@ -36,6 +37,19 @@ class TodoRepository(
                 Result.success(response.body()!!)
             } else {
                 Result.failure(IOException("Failed to fetch list details: ${response.message()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun createTodoList(title: String): Result<TodoList> {
+        return try {
+            val response = apiService.createTodoList(getAuthHeader(), CreateTodoListPayload(title))
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(IOException("Failed to create list: ${response.errorBody()?.string()}"))
             }
         } catch (e: Exception) {
             Result.failure(e)

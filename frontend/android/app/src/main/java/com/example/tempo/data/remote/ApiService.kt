@@ -30,6 +30,12 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Path("listId") listId: Int
     ): Response<TodoListWithItems>
+
+    @POST("lists")
+    suspend fun createTodoList(
+        @Header("Authorization") token: String,
+        @Body payload: CreateTodoListPayload
+    ): Response<TodoList>
 }
 
 // --- Data Transfer Objects ---
@@ -48,6 +54,10 @@ data class LoginRequest(
 data class LoginResponse(
     @SerializedName("token")
     val token: String
+)
+
+data class CreateTodoListPayload(
+    val title: String
 )
 
 

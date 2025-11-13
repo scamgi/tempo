@@ -42,7 +42,12 @@ class TodoViewModel(private val todoRepository: TodoRepository) : ViewModel() {
                     )
                 }
                 // Automatically select the first list if available
-                lists.firstOrNull()?.let { selectList(it.id) }
+                if (lists.isNotEmpty() && _uiState.value.selectedListId == null) {
+                    lists.firstOrNull()?.let { selectList(it.id) }
+                } else if (lists.isEmpty()) {
+                    // Clear selected list if no lists exist
+                    _uiState.update { it.copy(selectedListId = null, selectedListItems = emptyList(), selectedListTitle = null) }
+                }
             }.onFailure { e ->
                 _uiState.update {
                     it.copy(
@@ -74,6 +79,28 @@ class TodoViewModel(private val todoRepository: TodoRepository) : ViewModel() {
                     it.copy(
                         isLoading = false,
                         errorMessage = e.message ?: "An unknown error occurred"
+                    )
+                }
+            }
+        }
+    }
+
+    fun createTodoList(title: String) {
+        if (title.isBlank()) {
+            _uiState.update { it.copy(errorMessage = "Title cannot be empty") }
+            return
+        }
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            val result = todoRepository.createTodoList(title)
+            result.onSuccess {
+                // Refresh the lists to show the new one
+                fetchTodoLists()
+            }.onFailure { e ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = e.message ?: "Failed to create list"
                     )
                 }
             }
